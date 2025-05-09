@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 
 class RoomController extends Controller
@@ -66,6 +67,54 @@ class RoomController extends Controller
     {
         $room->delete();
         return redirect()->route('rooms.index')->with('success', 'Room deleted successfully!');
+    }
+
+    public function available(Request $request)
+    {
+        try {
+            // Start with all available rooms
+            $query = Room::where('status', 'available');
+
+            // Filter by room type if selected
+            if ($request->filled('room_type')) {
+                $query->where('type', $request->room_type);
+            }
+
+            // If dates are provided, filter by availability
+            if ($request->filled(['check_in', 'check_out'])) {
+                // Validate dates
+                $request->validate([
+                    'check_in' => 'required|date|after:today',
+                    'check_out' => 'required|date|after:check_in',
+                ]);
+
+                // Get rooms that are not booked for the selected dates
+                $bookedRoomIds = Booking::where(function ($query) use ($request) {
+                    $query->whereBetween('check_in', [$request->check_in, $request->check_out])
+                        ->orWhereBetween('check_out', [$request->check_in, $request->check_out]);
+                })->pluck('room_id');
+
+                $query->whereNotIn('id', $bookedRoomIds);
+            }
+
+            // Get the results
+            $rooms = $query->get();
+
+            // Log the query for debugging
+            \Log::info('Room search query:', [
+                'params' => $request->all(),
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings(),
+                'count' => $rooms->count()
+            ]);
+
+            return view('rooms.available', compact('rooms'));
+
+        } catch (\Exception $e) {
+            \Log::error('Room search error: ' . $e->getMessage());
+            return redirect()->route('rooms.available')
+                ->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 }
 ?>

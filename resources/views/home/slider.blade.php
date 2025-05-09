@@ -33,26 +33,24 @@
              <div class="col-md-5">
                 <div class="book_room">
                    <h1>Book a Room Online</h1>
-                   <form class="book_now">
-                      <div class="row">
-                         <div class="col-md-12">
-                            <span>Arrival</span>
-                            <img class="date_cua" src="images/date.png">
-                            <input class="online_book datepicker" placeholder="dd/mm/yyyy" type="date" name="dd/mm/yyyy">
-                         </div>
-                         <div class="col-md-12">
-                            <span>Departure</span>
-                            <img class="date_cua" src="images/date.png">
-                            <input class="online_book" placeholder="dd/mm/yyyy" type="date" name="dd/mm/yyyy">
-                         </div>
-                         <div class="col-md-12">
-                            <button class="book_btn">Book Now</button>
-                         </div>
-                      </div>
-                   </form>
+                   @auth
+                       <div class="row">
+                           <div class="col-md-12 text-center">
+                               <a href="{{ route('rooms.available') }}" class="book_btn">Search Available Rooms</a>
+                           </div>
+                       </div>
+                   @else
+                       <div class="row">
+                           <div class="col-md-12 text-center">
+                               <p class="text-white mb-3">Please login to book a room</p>
+                               <a href="{{ route('login') }}" class="book_btn">Login to Book</a>
+                           </div>
+                       </div>
+                   @endauth
                 </div>
              </div>
           </div>
        </div>
     </div>
  </section>
+

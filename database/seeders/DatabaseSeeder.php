@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use AdminUserSeeder;
 use Illuminate\Database\Seeder;
-use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,6 +18,8 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         // Seed the default admin user
-        $this->call(AdminUserSeeder::class);
+        $this->call([
+            RoomSeeder::class,
+        ]);
     }
 }
