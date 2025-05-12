@@ -11,51 +11,19 @@
     </li>
     <li>
       <a href="{{ route('rooms.index') }}" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
-        <i class="fa-solid fa-hotel w-6 mr-3"></i>
+        <i class="fa-solid fa-bed w-6 mr-3"></i>
         <span>Rooms</span>
       </a>
     </li>
     <li>
-      <a href="#" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
+      <a href="{{ route('profile.edit') }}" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
         <i class="far fa-user w-6 mr-3"></i>
         <span>Profile</span>
       </a>
-    </li>
     <li>
-      <a href="#" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
-        <i class="fa-solid fa-diagram-project w-6 mr-3"></i>
-        <span>Projects</span>
-      </a>
-    </li>
-    <li>
-      <a href="#" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
-        <i class="fa-solid fa-graduation-cap w-6 mr-3"></i>
-        <span>Courses</span>
-      </a>
-    </li>
-    <li>
-      <a href="#" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
-        <i class="far fa-user-circle w-6 mr-3"></i>
-        <span>Freinds</span>
-      </a>
-    </li>
-    <li>
-      <a href="#" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
-        <i class="far fa-file w-6 mr-3"></i>
-        <span>Files</span>
-      </a>
-    </li>
-    <li>
-      <a href="#" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
-        <i class="fas fa-cog w-6 mr-3"></i>
-        <span>Setting</span>
-      </a>
-    </li>
-    @else
-    <li>
-      <a href="#" class="flex bg-gray-100 items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
-        <i class="far fa-user w-6 mr-3"></i>
-        <span>Profile</span>
+      <a href="{{ route('reservations') }}" class="flex items-center rounded-md p-3 text-gray-700 hover:bg-gray-100">
+        <i class="fa-solid fa-hotel w-6 mr-3"></i>
+        <span>Bookings</span>
       </a>
     </li>
     @endif

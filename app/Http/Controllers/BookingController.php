@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
-    public function create(Room $room)
+    public function create()
     {
-        return view('bookings.create', compact('room'));
+        $availableRooms = Room::where('status', 'available')->get();
+        return view('bookings.create', compact('availableRooms'));
     }
 
     public function store(Request $request)
@@ -65,7 +66,7 @@ class BookingController extends Controller
 
     public function index()
     {
-        $bookings = Auth::user()->bookings()->with('room')->latest()->get();
+        $bookings = Booking::where('user_id', Auth::id())->with('room')->latest()->get();
         return view('bookings.index', compact('bookings'));
     }
 
@@ -77,5 +78,54 @@ class BookingController extends Controller
         }
 
         return view('bookings.show', compact('booking'));
+    }
+
+    public function edit(Booking $booking)
+    {
+        // Ensure the user can only edit their own bookings
+        if ($booking->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('bookings.edit', compact('booking'));
+    }
+
+    public function update(Request $request, Booking $booking)
+    {
+        // Ensure the user can only update their own bookings
+        if ($booking->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'check_in' => 'required|date|after:today',
+            'check_out' => 'required|date|after:check_in',
+        ]);
+
+        // Check if the room is already booked for these dates
+        $existingBooking = Booking::where('room_id', $booking->room_id)
+            ->where('id', '!=', $booking->id)
+            ->where(function ($query) use ($validated) {
+                $query->whereBetween('check_in', [$validated['check_in'], $validated['check_out']])
+                    ->orWhereBetween('check_out', [$validated['check_in'], $validated['check_out']]);
+            })
+            ->first();
+
+        if ($existingBooking) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'This room is already booked for the selected dates.');
+        }
+
+        $booking->update($validated);
+
+        return redirect()->route('bookings.show', $booking)
+            ->with('success', 'Booking updated successfully!');
+    }
+    public function print($id)
+    {
+        $booking = Booking::with(['room', 'user', 'payments'])->findOrFail($id);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('bookings.print', compact('booking'));
+        return $pdf->download('booking_' . $booking->id . '.pdf');
     }
 } 

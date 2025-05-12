@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Http\Request;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PaymentController extends Controller
 {
@@ -38,6 +38,9 @@ class PaymentController extends Controller
 
         // Update booking status to confirmed
         $booking->update(['status' => 'confirmed']);
+        
+        // Update room status to booked
+        $booking->room->update(['status' => 'booked']);
 
         return redirect()->route('bookings.show', $booking)
             ->with('success', 'Payment recorded successfully. Your booking is now confirmed!');
@@ -49,8 +52,8 @@ class PaymentController extends Controller
         $user = $booking->user;
         $room = $booking->room;
 
-        $pdf = PDF::loadView('payments.receipt', compact('payment', 'booking', 'user', 'room'));
+        $pdf = Pdf::loadView('payments.receipt', compact('payment', 'booking', 'user', 'room'));
         
         return $pdf->download('receipt-' . $payment->id . '.pdf');
     }
-} 
+}

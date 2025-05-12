@@ -1,4 +1,6 @@
-<x-dashboard-layout>
+@extends('layouts.app')
+
+@section('content')
     <div class="p-6 max-w-7xl mx-auto">
         <h2 class="text-2xl font-semibold text-gray-800 mb-6">My Bookings</h2>
 
@@ -64,4 +66,4 @@
             </div>
         @endif
     </div>
-</x-dashboard-layout> 
+@endsection

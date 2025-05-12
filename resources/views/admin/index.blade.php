@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<x-dashboard-layout>
 <div class="space-y-6">
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -106,10 +104,10 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($recentBookings as $booking)
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->client->first_name }} {{ $booking->client->last_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->user->first_name }} {{ $booking->user->last_name }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->room->room_number }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->check_in_date->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->check_out_date->format('M d, Y') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->check_in->format('M d, Y') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->check_out->format('M d, Y') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                     {{ $booking->status === 'confirmed' ? 'bg-green-100 text-green-800' : 
@@ -147,4 +145,4 @@
         </div>
     </div>
 </div>
-@endsection
+</x-dashboard-layout>

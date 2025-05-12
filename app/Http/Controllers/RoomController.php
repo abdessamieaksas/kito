@@ -4,13 +4,31 @@ namespace App\Http\Controllers;
 use App\Models\Room;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RoomController extends Controller
 {
-    // Show all rooms
-    public function index()
+    // Show all rooms with pagination and search
+    public function index(Request $request)
     {
-        $rooms = Room::all();
+        $query = Room::query();
+        
+        // Search functionality
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('room_number', 'like', "%{$search}%")
+                  ->orWhere('type', 'like', "%{$search}%")
+                  ->orWhere('status', 'like', "%{$search}%");
+            });
+        }
+        
+        // Add sorting if needed
+        $query->orderBy('room_number');
+        
+        // Paginate results
+        $rooms = $query->paginate(10);
+        
         return view('admin.room', compact('rooms'));
     }
 
@@ -28,7 +46,15 @@ class RoomController extends Controller
             'type' => 'required|string',
             'price' => 'required|numeric',
             'status' => 'required|in:available,booked,maintenance',
+            'room_image' => 'nullable|image|max:2048',
         ]);
+        
+        // Handle image upload
+        if ($request->hasFile('room_image')) {
+            // Store directly to the public disk in the 'rooms' directory
+            $path = $request->file('room_image')->store('rooms', 'public');
+            $validated['image_path'] = $path;
+        }
 
         Room::create($validated);
 
@@ -55,7 +81,20 @@ class RoomController extends Controller
             'type' => 'required|string',
             'price' => 'required|numeric',
             'status' => 'required|in:available,booked,maintenance',
+            'room_image' => 'nullable|image|max:2048',
         ]);
+        
+        // Handle image upload
+        if ($request->hasFile('room_image')) {
+            // Delete old image if exists
+            if ($room->image_path) {
+                Storage::disk('public')->delete($room->image_path);
+            }
+            
+            // Store directly to the public disk in the 'rooms' directory
+            $path = $request->file('room_image')->store('rooms', 'public');
+            $validated['image_path'] = $path;
+        }
 
         $room->update($validated);
 
@@ -65,6 +104,11 @@ class RoomController extends Controller
     // Delete a room
     public function destroy(Room $room)
     {
+        // Delete room image if exists
+        if ($room->image_path) {
+            Storage::disk('public')->delete($room->image_path);
+        }
+        
         $room->delete();
         return redirect()->route('rooms.index')->with('success', 'Room deleted successfully!');
     }
@@ -97,16 +141,8 @@ class RoomController extends Controller
                 $query->whereNotIn('id', $bookedRoomIds);
             }
 
-            // Get the results
-            $rooms = $query->get();
-
-            // Log the query for debugging
-            \Log::info('Room search query:', [
-                'params' => $request->all(),
-                'sql' => $query->toSql(),
-                'bindings' => $query->getBindings(),
-                'count' => $rooms->count()
-            ]);
+            // Get the results with pagination
+            $rooms = $query->paginate(6)->withQueryString();
 
             return view('rooms.available', compact('rooms'));
 

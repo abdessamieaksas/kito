@@ -5,7 +5,7 @@ use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\BookingController;
-
+use App\Http\Controllers\Admin\DashboardController;
 Route::get('/', function () {
     return view('home.index');
 })->name('home');
@@ -14,23 +14,19 @@ Route::get('/', function () {
 Route::get('/rooms/available', [RoomController::class, 'available'])->name('rooms.available');
 
 Route::middleware([AdminMiddleware::class, 'auth', 'verified'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.index');
-    })->name('dashboard');
-
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+      Route::get('/reservations', [DashboardController::class, 'reservations'])->name('reservations');
     Route::resource('rooms', RoomController::class);
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/bookings/{booking}/print', [BookingController::class, 'print'])->name('bookings.print');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Admin Routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
-});
+
 
 // Payment Routes
 Route::middleware(['auth'])->group(function () {
@@ -41,10 +37,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Booking Routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/bookings/create/{room}', [BookingController::class, 'create'])->name('bookings.create');
-    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
-    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::resource('bookings', BookingController::class);
 });
 
 require __DIR__.'/auth.php';
